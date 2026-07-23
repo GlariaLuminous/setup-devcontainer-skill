@@ -1,0 +1,23 @@
+name: CI in DevContainer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run dev container
+        uses: devcontainers/ci@v1
+        with:
+          runCmd: |
+            # 这些命令会在 dev container 内部执行
+            # 根据项目语言替换下面的命令
+            npm ci
+            npm run build
+            npm test

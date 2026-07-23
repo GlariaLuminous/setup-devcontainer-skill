@@ -1,0 +1,31 @@
+{
+  "name": "Kotlin Development",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installGradle": true,
+      "installMaven": true
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "./gradlew dependencies",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "fwcd.kotlin",
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "kotlin.languageServer.enabled": true,
+        "java.configuration.updateBuildConfiguration": "automatic"
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+  ]
+}

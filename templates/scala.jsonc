@@ -1,0 +1,32 @@
+{
+  "name": "Scala Development",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installSbt": true
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "sbt update",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "scala-lang.scala",
+        "scalameta.metals",
+        "vscjava.vscode-java-pack"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "metals.enabled": true,
+        "files.watcherExclude": {
+          "**/target/**": true
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+  ]
+}

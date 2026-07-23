@@ -42,6 +42,10 @@ Scan the project root for these files in order:
 | `Gemfile` | Ruby | bundler | rspec / minitest | rubocop |
 | `composer.json` | PHP | composer | phpunit | php-cs-fixer |
 | `CMakeLists.txt` or `Makefile` | C / C++ | cmake / make | ctest | clang-format |
+| `build.sbt` | Scala | sbt | sbt test | scalafmt |
+| `*.gradle.kts` or `*.gradle` | Kotlin | gradle | gradle test | ktlint / detekt |
+| `Package.swift` | Swift | swift | swift test | swift-format |
+| `deno.json` or `deno.jsonc` | Deno | deno | deno test | deno lint / deno fmt |
 
 **Completion criterion**: language, package manager, test runner, and linter are identified. If detection is ambiguous, ask the user.
 
@@ -86,6 +90,10 @@ Pick the base image from this table:
 | Ruby | `mcr.microsoft.com/devcontainers/ruby` | `3.4`, `3.3`, `3.2` |
 | PHP | `mcr.microsoft.com/devcontainers/php` | `8.4`, `8.3` |
 | C/C++ | `mcr.microsoft.com/devcontainers/cpp` | `bookworm`, `noble` |
+| Kotlin | `mcr.microsoft.com/devcontainers/java` | `21`, `17` |
+| Scala | `mcr.microsoft.com/devcontainers/java` | `21`, `17` |
+| Swift | `swift` (Docker Hub) | `6.0`, `5.10` |
+| Deno | `mcr.microsoft.com/devcontainers/typescript-node` + Deno feature | `22`, `20` |
 | Universal | `mcr.microsoft.com/devcontainers/universal` | `2` |
 
 Use the latest stable tag unless the project pins an older version.
@@ -170,7 +178,7 @@ Create `docker-compose.yml` in the project root (or `.devcontainer/`), and refer
 }
 ```
 
-Common `docker-compose.yml` services are in `templates/docker-compose.yml` — pick the right services and merge them.
+Common `docker-compose.yml` services are in `templates/compose/` — pick the right services and merge them.
 
 **Post-create command by language**:
 
@@ -188,6 +196,10 @@ Common `docker-compose.yml` services are in `templates/docker-compose.yml` — p
 | .NET | `dotnet restore` |
 | Ruby | `bundle install` |
 | PHP | `composer install` |
+| Scala (sbt) | `sbt update` |
+| Kotlin (gradle) | `./gradlew dependencies` |
+| Swift | `swift package resolve` |
+| Deno | `deno cache main.ts` |
 
 **Forward ports by framework**:
 
@@ -202,6 +214,10 @@ Common `docker-compose.yml` services are in `templates/docker-compose.yml` — p
 | .NET | 5000 |
 | Ruby Rails | 3000 |
 | PHP Laravel | 8000 |
+| Kotlin (Spring Boot) | 8080 |
+| Scala (Play) | 9000 |
+| Swift (Vapor) | 8080 |
+| Deno (Oak) | 8000 |
 
 **Completion criterion**: `.devcontainer/devcontainer.json` exists with correct image/build config, extensions, and post-create command.
 
@@ -224,6 +240,10 @@ Look at project dependencies and add matching extensions:
 | Jupyter | `ms-toolsai.jupyter` |
 | Tailwind CSS | `bradlc.vscode-tailwindcss` |
 | Biome | `biomejs.biome` |
+| Kotlin | `fwcd.kotlin`, `vscjava.vscode-gradle` |
+| Scala | `scala-lang.scala`, `scalameta.metals` |
+| Swift | `sswg.swift-lang`, `vadimcn.vscode-lldb` |
+| Deno | `denoland.vscode-deno` |
 
 Add `github.copilot` and `github.copilot-chat` if user consents.
 
@@ -318,7 +338,44 @@ For Rust projects specifically, add these for debugger support:
 
 **Completion criterion**: Security checklist passed.
 
-### Step 8: Verify
+### Step 8: Generate CI workflow (optional)
+
+If the project has a CI pipeline (GitHub Actions, GitLab CI, etc.), add a CI workflow that uses the devcontainer:
+
+#### GitHub Actions
+
+Create `.github/workflows/ci.yml` using the template at `templates/ci/devcontainer-ci.yml`:
+
+```yaml
+name: CI in DevContainer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run dev container
+        uses: devcontainers/ci@v1
+        with:
+          runCmd: |
+            <install-command>
+            <build-command>
+            <test-command>
+```
+
+Replace placeholders with the correct commands for the detected language.
+
+**Benefits**: This ensures CI runs in exactly the same environment as local development, eliminating "works on my machine" gaps.
+
+**Completion criterion**: CI workflow exists if the project has a CI pipeline. Otherwise, skip.
+
+### Step 9: Verify
 
 - [ ] `.devcontainer/devcontainer.json` is valid JSONC
 - [ ] Dockerfile path (if used) is correct relative to context
