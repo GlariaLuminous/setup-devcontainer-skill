@@ -1,0 +1,3 @@
+interface:
+  display_name: "Setup DevContainer"
+  short_description: "Generate a complete DevContainer configuration for any project"

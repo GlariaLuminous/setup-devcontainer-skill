@@ -1,0 +1,24 @@
+{
+  "name": "PHP Development",
+  "image": "mcr.microsoft.com/devcontainers/php:8.4",
+  "forwardPorts": [8000],
+  "postCreateCommand": "composer install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "neilbrayfield.php-docblocker",
+        "DEVSENSE.phptools-vscode"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "intelephense.files.maxSize": 5000000,
+        "php.validate.enable": true
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
+  ]
+}
