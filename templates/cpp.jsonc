@@ -1,0 +1,20 @@
+{
+  "name": "C/C++ Development",
+  "image": "mcr.microsoft.com/devcontainers/cpp:bookworm",
+  "forwardPorts": [],
+  "postCreateCommand": "<configure-command>",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "C_Cpp.default.compilerPath": "/usr/bin/g++",
+        "cmake.configureOnOpen": false
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}

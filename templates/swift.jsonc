@@ -1,6 +1,9 @@
 {
   "name": "Swift Development",
-  "image": "swift:6.0",
+  "build": {
+    "dockerfile": "Swift.Dockerfile",
+    "context": ".."
+  },
   "forwardPorts": [8080],
   "postCreateCommand": "swift package resolve",
   "customizations": {
@@ -15,8 +18,5 @@
       }
     }
   },
-  "remoteUser": "vscode",
-  "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
-  ]
+  "remoteUser": "vscode"
 }

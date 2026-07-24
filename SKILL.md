@@ -92,11 +92,13 @@ Pick the base image from this table:
 | C/C++ | `mcr.microsoft.com/devcontainers/cpp` | `bookworm`, `noble` |
 | Kotlin | `mcr.microsoft.com/devcontainers/java` | `21`, `17` |
 | Scala | `mcr.microsoft.com/devcontainers/java` | `21`, `17` |
-| Swift | `swift` (Docker Hub) | `6.0`, `5.10` |
+| Swift | Custom Dockerfile based on `swift` (Docker Hub) | `6.0`, `5.10` |
 | Deno | `mcr.microsoft.com/devcontainers/typescript-node` + Deno feature | `22`, `20` |
 | Universal | `mcr.microsoft.com/devcontainers/universal` | `2` |
 
 Use the latest stable tag unless the project pins an older version.
+
+The official Swift image does not provide the `vscode` user required by the security baseline. For Swift projects, use `templates/swift.jsonc` together with `templates/Swift.Dockerfile`; do not generate an image-only configuration with `remoteUser: "vscode"`.
 
 ```jsonc
 {
@@ -110,10 +112,7 @@ Use the latest stable tag unless the project pins an older version.
       "settings": {}
     }
   },
-  "remoteUser": "vscode",
-  "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly"
-  ]
+  "remoteUser": "vscode"
 }
 ```
 
@@ -157,7 +156,7 @@ Then in `devcontainer.json`:
 
 #### Strategy C: Docker Compose
 
-Create `docker-compose.yml` in the project root (or `.devcontainer/`), and reference it from `devcontainer.json`.
+Create `.devcontainer/docker-compose.yml`. Keep this location fixed so that all paths in the template are deterministic: the build context and workspace bind mount use `..` to refer to the project root.
 
 `devcontainer.json`:
 
@@ -178,17 +177,21 @@ Create `docker-compose.yml` in the project root (or `.devcontainer/`), and refer
 }
 ```
 
-Common `docker-compose.yml` services are in `templates/compose/` — pick the right services and merge them.
+Common `docker-compose.yml` services are in `templates/compose/` — pick only the required services and merge them. Add or remove each service and its matching `depends_on` entry as a complete YAML block; do not use environment-variable interpolation to conditionally create mapping keys.
 
 **Post-create command by language**:
 
 | Language | Command |
 |----------|---------|
+| Python (uv) | `uv sync --frozen` |
+| Python (poetry) | `poetry install --no-interaction` |
+| Python (pdm) | `pdm sync --frozen-lockfile` |
 | Python (pip) | `pip install -r requirements.txt` |
-| Python (poetry) | `poetry install` |
-| Node.js (npm) | `npm install` |
-| Node.js (pnpm) | `pnpm install` |
-| Node.js (yarn) | `yarn install` |
+| Node.js (npm, with lockfile) | `npm ci` |
+| Node.js (npm, no lockfile) | `npm install` |
+| Node.js (pnpm) | `pnpm install --frozen-lockfile` |
+| Node.js (yarn) | `yarn install --immutable` |
+| Node.js (bun) | `bun install --frozen-lockfile` |
 | Rust | `cargo build` |
 | Go | `go mod download` |
 | Java (maven) | `mvn dependency:resolve` |
@@ -324,7 +327,8 @@ Verify these properties are set correctly:
 
 - `remoteUser` is `vscode` (not root)
 - Container runs without `privileged: true` unless Docker-in-Docker is required
-- SSH keys are mounted read-only: `readonly` in mount options
+- Prefer the editor's SSH agent forwarding; do not mount the host `.ssh` directory by default
+- If agent forwarding is unavailable, ask before adding a read-only SSH mount
 - `.env` files are in `.dockerignore`
 - No secrets baked into Dockerfile or devcontainer.json
 - `capAdd` only includes what's needed (e.g., `SYS_PTRACE` for Rust/LLDB)
@@ -395,7 +399,7 @@ Replace placeholders with the correct commands for the detected language.
 |---------|---------|-----|
 | `node_modules` from host overwrites container | Module not found errors | Add `"mounts": ["source=project-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"]` or ensure `.dockerignore` excludes it |
 | Container exits immediately | VS Code shows "Container started" then disconnects | Set `"overrideCommand": true` or `"shutdownAction": "none"` |
-| Git auth fails inside container | `Permission denied (publickey)` | Mount SSH keys: `source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,readonly` |
+| Git auth fails inside container | `Permission denied (publickey)` | Verify the host SSH agent is running and forwarded; ask before mounting key files |
 | Bind mount permissions on Linux | Can't write files from container | Set `"remoteUser": "vscode"` and `"updateRemoteUserUID": true` |
 | Port not accessible | Can't open localhost:3000 | Check `"forwardPorts"` includes the port, and app binds to `0.0.0.0` not `127.0.0.1` |
 | Image not found | Build fails with manifest unknown | Verify image name and tag at `mcr.microsoft.com/devcontainers/<name>:<tag>` |

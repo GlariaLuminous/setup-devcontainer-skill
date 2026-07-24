@@ -18,4 +18,10 @@ PR 和 issue 都欢迎。
 
 ### 本地测试
 
-这个项目就是一堆配置文件和 markdown，不需要构建。改完直接看效果就行。
+提交前运行：
+
+```bash
+bash tests/validate-templates.sh
+```
+
+新增语言模板时，还要同步 README 的支持列表，并确保模板使用非 root 用户、没有默认挂载宿主机 SSH 私钥。

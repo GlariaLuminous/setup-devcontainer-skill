@@ -28,6 +28,10 @@
 | Ruby | 预构建镜像 | 需要系统级 gem 依赖 |
 | PHP | 预构建镜像 | 需要额外扩展（exif、gd 等） |
 | C/C++ | 预构建镜像 | 如果需要特定版本的编译工具链 |
+| Kotlin | Java 预构建镜像 | 需要额外系统工具或特定 Gradle 环境 |
+| Scala | Java 预构建镜像 | 需要额外系统工具或特定 sbt 环境 |
+| Swift | 自定义 Dockerfile | 为官方 Swift 镜像创建非 root 开发用户 |
+| Deno | Node.js 镜像 + Deno feature | 需要额外系统级依赖 |
 
 检测到项目用了 PostgreSQL、MySQL、Redis 或 MongoDB 时，会自动生成 docker-compose.yml 带上这些服务。
 
@@ -51,7 +55,15 @@ skill 会自动检测项目结构，问你要不要加数据库，然后生成�
 .dockerignore             # 防止构建上下文过大
 ```
 
-参考模板在 `templates/` 目录下，每种语言一个独立的 jsonc 文件。
+参考模板在 `templates/` 目录下，每种语言一个独立的 jsonc 文件。Swift 模板需要同时复制 `Swift.Dockerfile`，以便在官方镜像中创建非 root 开发用户。模板中的安装命令会根据项目锁文件替换，例如 npm 项目优先使用 `npm ci`，uv 项目使用 `uv sync --frozen`。
+
+## 验证模板
+
+```bash
+bash tests/validate-templates.sh
+```
+
+验证脚本会检查 JSON 模板、Compose 路径、安全默认值和包管理器占位符。仓库 CI 会在每次 push 和 PR 时执行同一套检查。
 
 ## 和 Docker / Microsoft 的关系
 
