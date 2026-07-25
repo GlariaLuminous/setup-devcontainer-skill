@@ -5,7 +5,7 @@
     "context": ".."
   },
   "forwardPorts": [8080],
-  "postCreateCommand": "swift package resolve",
+  "postCreateCommand": "<install-command>",
   "customizations": {
     "vscode": {
       "extensions": [

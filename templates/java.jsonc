@@ -2,7 +2,7 @@
   "name": "Java Development",
   "image": "mcr.microsoft.com/devcontainers/java:21",
   "forwardPorts": [8080],
-  "postCreateCommand": "./mvnw dependency:resolve",
+  "postCreateCommand": "<install-command>",
   "customizations": {
     "vscode": {
       "extensions": [

@@ -19,3 +19,8 @@ jobs:
           node-version: 22
       - name: Validate templates
         run: bash tests/validate-templates.sh
+      - name: Validate Docker Compose templates
+        run: |
+          docker compose -f templates/docker-compose.yml config
+          docker compose -f templates/compose/mysql.yml config
+          docker compose -f templates/compose/mongodb.yml config

@@ -202,7 +202,7 @@ Common `docker-compose.yml` services are in `templates/compose/` — pick only t
 | Scala (sbt) | `sbt update` |
 | Kotlin (gradle) | `./gradlew dependencies` |
 | Swift | `swift package resolve` |
-| Deno | `deno cache main.ts` |
+| Deno | `deno install` |
 
 **Forward ports by framework**:
 
@@ -365,7 +365,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and run dev container
-        uses: devcontainers/ci@v1
+        uses: devcontainers/ci@v0.3
         with:
           runCmd: |
             <install-command>

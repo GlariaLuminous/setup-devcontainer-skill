@@ -2,9 +2,8 @@
   "name": "Scala Development",
   "image": "mcr.microsoft.com/devcontainers/java:21",
   "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "21",
-      "installSbt": true
+    "ghcr.io/devcontainers-extra/features/sbt-sdkman:2": {
+      "jdkVersion": "none"
     }
   },
   "forwardPorts": [8080],

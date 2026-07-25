@@ -35,6 +35,28 @@
 
 检测到项目用了 PostgreSQL、MySQL、Redis 或 MongoDB 时，会自动生成 docker-compose.yml 带上这些服务。
 
+## 安装
+
+将仓库克隆到 agent skills 目录：
+
+```bash
+git clone https://github.com/GlariaLuminous/setup-devcontainer-skill.git ~/.agents/skills/setup-devcontainer-skill
+```
+
+Windows PowerShell：
+
+```powershell
+git clone https://github.com/GlariaLuminous/setup-devcontainer-skill.git "$HOME\.agents\skills\setup-devcontainer-skill"
+```
+
+更新已安装的 skill：
+
+```bash
+git -C ~/.agents/skills/setup-devcontainer-skill pull --ff-only
+```
+
+安装或更新后，重新启动 agent 客户端以加载最新内容。
+
 ## 用法
 
 ```bash

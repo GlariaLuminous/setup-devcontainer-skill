@@ -15,9 +15,9 @@ check() {
 }
 
 check "Compose build context points at the project root" \
-  grep -q '^      context: \.\.$' templates/docker-compose.yml
+  grep -Eq '^      context: \.\.[[:space:]]*$' templates/docker-compose.yml
 check "Compose mounts the project root" \
-  grep -q '^      - \.\./:/workspace$' templates/docker-compose.yml
+  grep -Eq '^      - \.\./:/workspace[[:space:]]*$' templates/docker-compose.yml
 check "Compose has no interpolated dependency keys" \
   sh -c '! grep -q "WITH_REDIS" templates/docker-compose.yml'
 check "Compose has no malformed volume suffix" \
@@ -27,13 +27,31 @@ check "Templates do not expose the host SSH directory" \
 check "Swift creates a non-root development user" \
   grep -q '"dockerfile": "Swift.Dockerfile"' templates/swift.jsonc
 check "Swift Dockerfile defines the vscode user" \
-  grep -q '^ARG USERNAME=vscode$' templates/Swift.Dockerfile
+  grep -Eq '^ARG USERNAME=vscode[[:space:]]*$' templates/Swift.Dockerfile
 check "Python install command is selected during generation" \
   grep -q '<install-command>' templates/python.jsonc
 check "Node install command is selected during generation" \
   grep -q '<install-command>' templates/node.jsonc
 check "Go initialization does not modify go.mod" \
   grep -q '"postCreateCommand": "go mod download"' templates/go.jsonc
+check "Deno install command does not assume an entrypoint" \
+  grep -q '"postCreateCommand": "deno install"' templates/deno.jsonc
+check "Deno uses an existing Feature" \
+  grep -q 'ghcr.io/devcontainers-extra/features/deno:1' templates/deno.jsonc
+check "Scala uses an existing sbt Feature" \
+  grep -q 'ghcr.io/devcontainers-extra/features/sbt-sdkman:2' templates/scala.jsonc
+check "Scala does not pass unsupported Java Feature options" \
+  sh -c '! grep -q "installSbt" templates/scala.jsonc'
+check "Generated CI uses an existing devcontainers/ci tag" \
+  grep -q 'uses: devcontainers/ci@v0.3' templates/ci/devcontainer-ci.yml
+check "Generated CI does not assume npm" \
+  sh -c '! grep -Eq "npm (ci|test|run)" templates/ci/devcontainer-ci.yml'
+check "Java install command is selected during generation" \
+  grep -q '<install-command>' templates/java.jsonc
+check "Kotlin install command is selected during generation" \
+  grep -q '<install-command>' templates/kotlin.jsonc
+check "Swift install command is selected during generation" \
+  grep -q '<install-command>' templates/swift.jsonc
 check "Every documented language has a template" \
   sh -c 'test "$(find templates -maxdepth 1 -name "*.jsonc" | wc -l | tr -d " ")" = 13'
 

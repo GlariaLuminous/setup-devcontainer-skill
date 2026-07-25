@@ -9,7 +9,7 @@
     }
   },
   "forwardPorts": [8080],
-  "postCreateCommand": "./gradlew dependencies",
+  "postCreateCommand": "<install-command>",
   "customizations": {
     "vscode": {
       "extensions": [

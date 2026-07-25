@@ -2,10 +2,10 @@
   "name": "Deno Development",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
   "features": {
-    "ghcr.io/devcontainers/features/deno:1": {}
+    "ghcr.io/devcontainers-extra/features/deno:1": {}
   },
   "forwardPorts": [8000],
-  "postCreateCommand": "deno cache main.ts",
+  "postCreateCommand": "deno install",
   "customizations": {
     "vscode": {
       "extensions": [
