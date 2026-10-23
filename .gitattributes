@@ -1,5 +1,17 @@
+# Everything is normalised to LF in the repository so the shell scripts and
+# YAML run identically on Windows, macOS and Linux. Windows checkouts still get
+# CRLF locally thanks to core.autocrlf, except for the paths below.
+* text=auto eol=lf
+
 *.sh text eol=lf
+*.mjs text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.json text eol=lf
 *.jsonc text eol=lf
 *.md text eol=lf
+*.py text eol=lf
+*.go text eol=lf
+*.mod text eol=lf
+*.txt text eol=lf
+Dockerfile text eol=lf

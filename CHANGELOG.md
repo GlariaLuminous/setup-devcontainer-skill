@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `tests/fixtures/` 四个能被真 build 的最小项目：`python-pip`、`node-npm`、`go-mod`（Strategy A）与 `node-postgres`（Strategy C）
+- `tests/validate-fixtures.sh`：不需要 Docker 的 fixture 静态校验，25 条断言，覆盖非 root、无悬空 build 引用、不挂宿主机 `.ssh`
+- `tests/check-fixture-refs.mjs`：静态解析 compose 的 build 引用并逐个 `stat`，拦下「Strategy C 忘了 Dockerfile」这类只有 build 时才暴露的错误
+- `tests/ci-run-fixture.sh`：`devcontainer up` → `devcontainer exec verify.sh` 的真实 build 入口
+- CI 新增 `build-fixtures` job，用 matrix 并发跑四个 fixture 的真 build
+- 仓库自身的 `.devcontainer/`（dogfood）：容器起来先跑 `bash tests/validate-templates.sh`，生成的配置坏了会立刻暴露
+
+### Fixed
+- `templates/docker-compose.yml` 补上 `command: sleep infinity`，否则 app 服务进程结束后容器立即退出
+- SKILL.md Strategy C 段落明确要求同时生成 `.devcontainer/Dockerfile`——compose 的 `app` 服务从它 build，缺了 `docker compose build` 直接失败
+
+### Changed
+- README 重写：痛点表、架构图、三策略决策图、三层质量保障说明
+- CONTRIBUTING 补充 fixture 的编写与注册方式
+
 ## [v1.2.1] - 2026-07-25
 
 ### Fixed

@@ -22,3 +22,8 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.pytest_cache/
+
+# Atomic-write locks left behind by some editors and agents
+.dsh-ops-update-*.lock
+*.lock.tmp

@@ -156,7 +156,9 @@ Then in `devcontainer.json`:
 
 #### Strategy C: Docker Compose
 
-Create `.devcontainer/docker-compose.yml`. Keep this location fixed so that all paths in the template are deterministic: the build context and workspace bind mount use `..` to refer to the project root.
+Create `.devcontainer/docker-compose.yml` **and** `.devcontainer/Dockerfile`. Strategy C implies Strategy B: the compose `app` service builds from `.devcontainer/Dockerfile`, so omitting the Dockerfile makes `docker compose build` fail immediately.
+
+Keep the compose file at this fixed location so that all paths are deterministic: the build context and workspace bind mount use `..` to refer to the project root.
 
 `devcontainer.json`:
 
@@ -186,7 +188,7 @@ Common `docker-compose.yml` services are in `templates/compose/` — pick only t
 | Python (uv) | `uv sync --frozen` |
 | Python (poetry) | `poetry install --no-interaction` |
 | Python (pdm) | `pdm sync --frozen-lockfile` |
-| Python (pip) | `pip install -r requirements.txt` |
+| Python (pip) | `pip install --user -r requirements.txt` |
 | Node.js (npm, with lockfile) | `npm ci` |
 | Node.js (npm, no lockfile) | `npm install` |
 | Node.js (pnpm) | `pnpm install --frozen-lockfile` |
@@ -221,6 +223,8 @@ Common `docker-compose.yml` services are in `templates/compose/` — pick only t
 | Scala (Play) | 9000 |
 | Swift (Vapor) | 8080 |
 | Deno (Oak) | 8000 |
+
+When `remoteUser` is a non-root user (which Step 7 requires), system-wide installs fail. Use the user-scoped form of the command: `pip install --user`, `npm config set prefix ~/.npm-global`, `cargo install --path .` instead of `cargo install`. Lockfile-first variants (`npm ci`, `uv sync --frozen`, `pnpm install --frozen-lockfile`, `yarn install --immutable`, `bun install --frozen-lockfile`) are required, not optional: they are what makes the container reproducible.
 
 **Completion criterion**: `.devcontainer/devcontainer.json` exists with correct image/build config, extensions, and post-create command.
 

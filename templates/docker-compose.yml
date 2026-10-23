@@ -5,6 +5,9 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ../:/workspace
+    # Override the image's default command; without this the container
+    # exits as soon as the process ends.
+    command: sleep infinity
     environment:
       - DATABASE_URL=${DATABASE_URL:-}
       - REDIS_URL=${REDIS_URL:-}
