@@ -4,7 +4,8 @@
 # These checks do NOT need Docker. They catch the class of bug that only
 # shows up at build time -- a compose service pointing at a Dockerfile that
 # does not exist, a build context that escapes the fixture, a devcontainer
-# that would run as root -- before CI spends minutes building images.
+# that would run as a user the image does not have -- before CI spends
+# minutes building images.
 #
 # The real build is exercised by .github/workflows/validate.yml, which runs
 # each fixture through @devcontainers/cli.
@@ -42,8 +43,8 @@ for fixture in $fixtures; do
     test -f "$fixture/verify.sh"
   check "$name does not expose the host SSH directory" \
     sh -c "! grep -Rqs 'localEnv:.*\.ssh' '$fixture'"
-  check "$name does not run the container as root" \
-    node tests/check-fixture-user.mjs "$config"
+  check "$name runs as a non-root user that the image ships" \
+    node tests/check-fixture-user.mjs "$config" "$fixture"
   check "$name has no dangling build references" \
     node tests/check-fixture-refs.mjs "$fixture"
 done

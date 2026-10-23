@@ -21,5 +21,8 @@
       }
     }
   },
-  "remoteUser": "vscode"
+  // The typescript-node image ships a "node" user, not "vscode". Setting
+  // "vscode" here makes the container fail to start with
+  // "unable to find user vscode: no matching entries in passwd file".
+  "remoteUser": "node"
 }

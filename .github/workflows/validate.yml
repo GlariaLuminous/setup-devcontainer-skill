@@ -49,4 +49,12 @@ jobs:
       - name: Install Dev Container CLI
         run: npm install -g @devcontainers/cli
       - name: Build ${{ matrix.fixture }} and run its checks
+        # Docker Compose >= v2.39 runs builds through bake by default, and
+        # Buildx >= v0.37.2 rejects the `Dockerfile-with-features` the Dev
+        # Container CLI writes outside the build context:
+        #   additional privileges requested: pass "--allow=fs.read=.../Dockerfile-with-features"
+        # Turning off bake's filesystem entitlement check restores the
+        # previous behaviour. Remove this once devcontainers/cli#1320 ships.
+        env:
+          BUILDX_BAKE_ENTITLEMENTS_FS: 0
         run: bash tests/ci-run-fixture.sh tests/fixtures/${{ matrix.fixture }}

@@ -21,8 +21,8 @@ PR 和 issue 都欢迎。
 提交前运行前两层，都不需要 Docker：
 
 ```bash
-bash tests/validate-templates.sh   # 33 条模板断言
-bash tests/validate-fixtures.sh    # 4 个 fixture × 6 条
+bash tests/validate-templates.sh   # 46 条模板断言
+bash tests/validate-fixtures.sh    # 4 个 fixture × 6 条 + 1
 ```
 
 第三层需要 Docker 和 Dev Container CLI，跑的是真 build：
@@ -32,14 +32,15 @@ npm install -g @devcontainers/cli
 bash tests/ci-run-fixture.sh tests/fixtures/python-pip
 ```
 
-CI 会把三个 fixture 全跑一遍，本地只跑你改动相关的那一个就够。
+CI 会把四个 fixture 全跑一遍，本地只跑你改动相关的那一个就够。
 
 ### 新增语言模板
 
 1. 在 `templates/` 下加 `<lang>.jsonc`
 2. 同步 README 的「支持的语言与数据库」表
 3. 确保模板使用非 root 用户、没有默认挂载宿主机 SSH 私钥、不残留 `<install-command>` 这类占位符
-4. 如果这个语言有独有的坑（比如 Swift 官方镜像没有 `vscode` 用户），在 README 的「内置的坑位清单」里补一条
+4. `remoteUser` 必须是该镜像里真实存在的用户：大多数 `devcontainers/*` 镜像是 `vscode`，但 `typescript-node`/`javascript-node` 是 `node`、`universal` 是 `codespace`。写错的话容器起不来，报 `unable to find user ...`。表在 `tests/image-user.mjs`
+5. 如果这个语言有独有的坑（比如 Swift 官方镜像没有 `vscode` 用户），在 README 的「内置的坑位清单」里补一条
 
 ### 新增 fixture
 

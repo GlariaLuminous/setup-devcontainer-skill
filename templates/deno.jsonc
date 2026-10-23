@@ -24,5 +24,6 @@
       }
     }
   },
-  "remoteUser": "vscode"
+  // Inherited from the typescript-node base image, which ships "node".
+  "remoteUser": "node"
 }

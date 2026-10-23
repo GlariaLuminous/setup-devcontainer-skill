@@ -98,6 +98,20 @@ Pick the base image from this table:
 
 Use the latest stable tag unless the project pins an older version.
 
+**`remoteUser` is not always `vscode`.** It must name a user that actually exists in the image, or the container fails to start with `unable to find user <name>: no matching entries in passwd file`. Verified against the image metadata:
+
+| Image | `remoteUser` |
+|-------|---------------|
+| `typescript-node`, `javascript-node` | `node` |
+| `universal` | `codespace` |
+| every other `mcr.microsoft.com/devcontainers/*` image | `vscode` |
+
+Check an image you are unsure about with:
+
+```bash
+docker image inspect <image> --format '{{index .Config.Labels "devcontainer.metadata"}}'
+```
+
 The official Swift image does not provide the `vscode` user required by the security baseline. For Swift projects, use `templates/swift.jsonc` together with `templates/Swift.Dockerfile`; do not generate an image-only configuration with `remoteUser: "vscode"`.
 
 ```jsonc
@@ -112,7 +126,7 @@ The official Swift image does not provide the `vscode` user required by the secu
       "settings": {}
     }
   },
-  "remoteUser": "vscode"
+  "remoteUser": "<image user, usually vscode>"
 }
 ```
 
@@ -329,7 +343,7 @@ npx -y @devcontainers/cli upgrade --workspace-folder .
 
 Verify these properties are set correctly:
 
-- `remoteUser` is `vscode` (not root)
+- `remoteUser` is non-root **and exists in the image** — `vscode` for most images, `node` for `typescript-node`/`javascript-node`, `codespace` for `universal`
 - Container runs without `privileged: true` unless Docker-in-Docker is required
 - Prefer the editor's SSH agent forwarding; do not mount the host `.ssh` directory by default
 - If agent forwarding is unavailable, ask before adding a read-only SSH mount
@@ -392,7 +406,7 @@ Replace placeholders with the correct commands for the detected language.
 - [ ] `postCreateCommand` won't fail (command exists in the image)
 - [ ] All referenced VS Code extensions exist in marketplace
 - [ ] Forward ports don't conflict
-- [ ] `remoteUser` is non-root
+- [ ] `remoteUser` is non-root and exists in the chosen image
 - [ ] `.dockerignore` exists and covers build context
 - [ ] Image tag exists on MCR (check format: `mcr.microsoft.com/devcontainers/<name>:<tag>`)
 - [ ] Features use pinned versions (not `latest`)
@@ -411,6 +425,8 @@ Replace placeholders with the correct commands for the detected language.
 | Dockerfile changes not picked up | Old config still in use | Run "Dev Containers: Rebuild Container" — reopening is not enough |
 | Docker Compose service name mismatch | Container can't find service | Ensure `"service"` in devcontainer.json matches a service name in docker-compose.yml |
 | Features not installing | Feature options ignored | Feature changes require rebuild; pinned versions prevent surprise upgrades |
+| Container refuses to start | `unable to find user vscode: no matching entries in passwd file` | The image has no `vscode` user. `typescript-node`/`javascript-node` use `node`, `universal` uses `codespace` |
+| Strategy C build fails on a recent Docker | `additional privileges requested: pass "--allow=fs.read=...Dockerfile-with-features"` | Docker Compose ≥ v2.39 enables bake by default and Buildx ≥ v0.37.2 rejects the out-of-context Dockerfile the CLI generates. Set `BUILDX_BAKE_ENTITLEMENTS_FS=0` (see devcontainers/cli#1320) |
 
 ## Common Rationalizations
 

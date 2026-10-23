@@ -1,7 +1,7 @@
 [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Templates](https://img.shields.io/badge/templates-13%20languages-blue.svg)](templates/)
-[![Checks](https://img.shields.io/badge/validate-33%20assertions-informational.svg)](tests/validate-templates.sh)
+[![Checks](https://img.shields.io/badge/validate-71%20assertions-informational.svg)](tests/)
 
 # setup-devcontainer-skill
 
@@ -39,7 +39,8 @@
 | 容器起来 3 秒就退出 | `docker-compose.yml` 里少了 `command: sleep infinity` | 40 分钟 |
 | `docker build` 卡在 sending context 500MB | 忘了 `.dockerignore`，把 `node_modules` 全塞进去了 | 25 分钟 |
 | 改完配置不生效 | 只 reopen 没 rebuild | 15 分钟 |
-| 进容器是 root，文件全变成 root 所有 | 没设 `remoteUser: "vscode"` | 30 分钟 |
+| 进容器是 root，文件全变成 root 所有 | 没设 `remoteUser` | 30 分钟 |
+| 容器起不来：`unable to find user vscode` | 抄了 `remoteUser: "vscode"`，但这个镜像只有 `node` 用户 | 1 小时 |
 | Codespaces 里连不上数据库 | `forwardPorts` 写错，或者用了 compose 的 `ports:` | 1 小时 |
 | Swift 项目进不去容器 | 官方 `swift` 镜像压根没有 `vscode` 用户 | 2 小时 |
 | 同事 clone 下来完全跑不起来 | 你的镜像 tag 是 `latest`，他拉到了新版 | 无限 |
@@ -62,7 +63,7 @@ graph LR
     subgraph AFTER["✅ 有 skill"]
         B1["说一句<br/>'配个 dev container'"] --> B2["检测技术栈"]
         B2 --> B3["按规则生成"]
-        B3 --> B4["33 条断言校验"]
+        B3 --> B4["71 条断言校验"]
         B4 --> B5["一次成功"]
     end
 
@@ -276,7 +277,7 @@ Agent 会：扫描项目 → 告诉你检测到了什么 → 问你要不要加�
 
 | 层 | 命令 | 需要 Docker | 查什么 |
 |---|---|---|---|
-| 模板 | `bash tests/validate-templates.sh` | 否 | 33 条断言：13 个模板齐全且 JSON 可解析、compose 的 `context` 必须是 `..`、Feature 路径必须真实存在、不得残留占位符 |
+| 模板 | `bash tests/validate-templates.sh` | 否 | 46 条断言：13 个模板齐全且 JSONC 可解析、`remoteUser` 必须与该镜像真实用户一致、compose 的 `context` 必须是 `..`、Feature 路径必须真实存在、不得残留占位符 |
 | fixture | `bash tests/validate-fixtures.sh` | 否 | 4 个真实小项目 × 6 条：非 root、无悬空 build 引用、不挂 `.ssh`、JSON 可解析 |
 | 真 build | `bash tests/ci-run-fixture.sh tests/fixtures/<name>` | 是 | `devcontainer up` 真起容器，再在里面跑该 fixture 的 `verify.sh` |
 
@@ -288,7 +289,7 @@ Agent 会：扫描项目 → 告诉你检测到了什么 → 问你要不要加�
 
 | Fixture | 策略 | 验证的能力 |
 |---|---|---|
-| `python-pip` | A（官方镜像） | `postCreateCommand` 装依赖、`remoteUser: vscode` 下 `pip install --user` 可写、pytest 能跑 |
+| `python-pip` | A（官方镜像） | `postCreateCommand` 装依赖、非 root 用户下 `pip install --user` 可写、pytest 能跑 |
 | `node-npm` | A | `npm ci` 走 lockfile、node 版本锁在 22、workspace 挂载可写 |
 | `go-mod` | A | `go mod download`、`go vet`、`go test` 在容器内全绿 |
 | `node-postgres` | C（compose） | 服务依赖健康检查生效、`DATABASE_URL` 注入到容器、`workspaceFolder` 挂载正确、容器内能连到 db |
@@ -304,7 +305,7 @@ CI 在每次 push / PR 时跑全部三层，外加对三个 compose 文件做 `d
 1. **compose 容器秒退** — 缺 `command: sleep infinity`，进程一结束容器就没了
 2. **build context 爆炸** — 缺 `.dockerignore`
 3. **改配置不生效** — 要 Rebuild，不是 Reopen
-4. **root 用户污染宿主机文件** — 缺 `remoteUser: "vscode"`
+4. **root 用户污染宿主机文件** — 缺 `remoteUser`
 5. **Codespaces 端口不通** — 该用 `forwardPorts` 而不是 compose 的 `ports:`
 6. **服务没就绪就连** — 缺 `depends_on: condition: service_healthy`
 7. **镜像 tag 漂移** — 用 `latest` 导致同事环境和你不一样
