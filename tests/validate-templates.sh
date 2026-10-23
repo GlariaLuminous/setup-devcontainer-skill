@@ -56,8 +56,16 @@ check "Every documented language has a template" \
   sh -c 'test "$(find templates -maxdepth 1 -name "*.jsonc" | wc -l | tr -d " ")" = 13'
 
 for template in templates/*.jsonc; do
-  check "$template is valid JSON" node -e \
-    'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$template"
+  check "$template is valid JSONC" node tests/parse-jsonc.mjs "$template"
+done
+
+# remoteUser has to name a user that exists in the image, or the container
+# refuses to start: "unable to find user vscode: no matching entries in
+# passwd file". typescript-node/javascript-node ship "node", universal ships
+# "codespace", every other devcontainers image ships "vscode".
+for template in templates/*.jsonc; do
+  check "$template sets the remoteUser its image actually ships" \
+    node tests/check-template-user.mjs "$template"
 done
 
 if (( failures > 0 )); then

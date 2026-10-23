@@ -19,8 +19,42 @@ jobs:
           node-version: 22
       - name: Validate templates
         run: bash tests/validate-templates.sh
+      - name: Validate fixture projects
+        run: bash tests/validate-fixtures.sh
       - name: Validate Docker Compose templates
         run: |
           docker compose -f templates/docker-compose.yml config
           docker compose -f templates/compose/mysql.yml config
           docker compose -f templates/compose/mongodb.yml config
+
+  # The checks above are static: they prove the files are well formed, not
+  # that they produce a working environment. This job actually builds each
+  # fixture with the Dev Container CLI and runs the fixture's verify.sh
+  # inside the resulting container.
+  build-fixtures:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture:
+          - python-pip
+          - node-npm
+          - go-mod
+          - node-postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Dev Container CLI
+        run: npm install -g @devcontainers/cli
+      - name: Build ${{ matrix.fixture }} and run its checks
+        # Docker Compose >= v2.39 runs builds through bake by default, and
+        # Buildx >= v0.37.2 rejects the `Dockerfile-with-features` the Dev
+        # Container CLI writes outside the build context:
+        #   additional privileges requested: pass "--allow=fs.read=.../Dockerfile-with-features"
+        # Turning off bake's filesystem entitlement check restores the
+        # previous behaviour. Remove this once devcontainers/cli#1320 ships.
+        env:
+          BUILDX_BAKE_ENTITLEMENTS_FS: 0
+        run: bash tests/ci-run-fixture.sh tests/fixtures/${{ matrix.fixture }}

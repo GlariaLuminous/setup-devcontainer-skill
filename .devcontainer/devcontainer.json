@@ -1,0 +1,26 @@
+{
+  "name": "setup-devcontainer-skill",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  // Dogfooding: the repository develops itself inside the environment this
+  // skill generates, and re-runs its own Docker-free checks on every start.
+  // If the generated configuration regresses, the dev environment says so
+  // immediately instead of a contributor finding out at PR time.
+  "postCreateCommand": "bash tests/validate-templates.sh && bash tests/validate-fixtures.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "redhat.vscode-yaml",
+        "bierner.markdown-mermaid"
+      ],
+      "settings": {
+        "files.eol": "\n",
+        "editor.formatOnSave": false,
+        "[markdown]": {
+          "editor.wordWrap": "on"
+        }
+      }
+    }
+  },
+  // typescript-node ships "node"; see templates/node.jsonc.
+  "remoteUser": "node"
+}
